@@ -48,7 +48,7 @@ Each of those is a door. Now that I've walked through them once, I can walk thro
 
 ## Try it
 
-A live version is at [your-url-here] *(replace with your hosted URL — GitHub Pages, Netlify, your blog, wherever)*. The source is on [GitHub](https://github.com/annbjer/un-hommage-a-baton-de-pluies). It runs entirely in your browser; the camera feed never leaves your machine. Point it at anything that moves and listen.
+A live version is at [annbjer.github.io/un-hommage-a-baton-de-pluies](https://annbjer.github.io/un-hommage-a-baton-de-pluies/un-hommage-a-baton-de-pluies.html). The source is on [GitHub](https://github.com/annbjer/un-hommage-a-baton-de-pluies). It runs entirely in your browser; the camera feed never leaves your machine. Point it at anything that moves and listen.
 
 And go look at the [original *Bâton de pluies*](https://ilpleut.studio). Mine is a sketch from a video. Theirs is the work.
 
