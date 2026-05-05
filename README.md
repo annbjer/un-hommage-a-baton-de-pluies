@@ -6,7 +6,7 @@ A browser-based recreation and reinterpretation of the audiovisual installation 
 
 **[▶ Try it live](https://annbjer.github.io/un-hommage-a-baton-de-pluies/un-hommage-a-baton-de-pluies.html)** — runs entirely in your browser, webcam included.
 
-![Screenshot placeholder — replace with your own](./docs/screenshot.png)
+![Un hommage à Bâton de pluies — light mode](./docs/screenshot.png)
 
 ---
 
