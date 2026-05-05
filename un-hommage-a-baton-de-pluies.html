@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Un hommage à Bâton de pluies — after lolalevient × AIRMOW</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/p5.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+
+<style>
+  /* ---------- Theme variables (light = default, dark via body.dark) ---------- */
+  :root {
+    --page-bg: #f4f2ed;
+    --fg: #111;
+    --fg-rgb: 17, 17, 17;
+    --panel-frame: rgba(30, 30, 30, 0.45);
+    --slider-bg: rgba(244, 242, 237, 0.85);
+  }
+  body.dark {
+    --page-bg: #0f0f12;        /* deep near-black with a warm-cool shift */
+    --fg: #e8e6df;             /* off-white text, slightly warm */
+    --fg-rgb: 232, 230, 223;
+    --panel-frame: rgba(232, 230, 223, 0.30);
+    --slider-bg: rgba(15, 15, 18, 0.85);
+  }
+
+  /* ---------- Base: gallery / print aesthetic ---------- */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: var(--page-bg);
+    color: var(--fg);
+    font-family: 'Helvetica Neue', 'Inter', Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    user-select: none;
+    -webkit-user-select: none;
+    transition: background 0.4s ease, color 0.4s ease;
+  }
+
+  #canvas-wrap {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+  }
+  canvas { display: block; }
+
+  /* ---------- Bottom-left text caption ---------- */
+  #caption {
+    position: fixed;
+    z-index: 10;
+    font-size: 13px;
+    line-height: 1.5;
+    letter-spacing: 0.02em;
+    color: var(--fg);
+    pointer-events: none;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  #caption .badge {
+    display: inline-block;
+    width: 16px; height: 16px;
+    border: 1px solid var(--fg);
+    text-align: center;
+    line-height: 14px;
+    font-size: 11px;
+    font-weight: 500;
+    flex: 0 0 16px;
+    margin-top: 2px;
+  }
+  #caption .lines > div { white-space: nowrap; }
+
+  /* ---------- Discreet controls bottom-right ---------- */
+  #controls {
+    position: fixed;
+    bottom: 18px;
+    right: 18px;
+    z-index: 10;
+    display: flex;
+    gap: 8px;
+  }
+  #controls button {
+    background: transparent;
+    color: var(--fg);
+    border: 1px solid var(--fg);
+    padding: 6px 12px;
+    font-family: inherit;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  #controls button:hover { background: var(--fg); color: var(--page-bg); }
+  #controls button.muted { opacity: 0.4; }
+  #controls button.active { background: var(--fg); color: var(--page-bg); }
+
+  /* Flip button only matters when camera is on */
+  #btn-flip { display: none; }
+  #btn-flip.visible { display: inline-block; }
+
+  /* Sensitivity slider — appears when camera is active, top-right */
+  #sens {
+    position: fixed;
+    top: 18px;
+    right: 18px;
+    z-index: 10;
+    display: none;
+    align-items: center;
+    gap: 10px;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    color: var(--fg);
+    background: var(--slider-bg);
+    padding: 6px 12px;
+    border: 1px solid var(--fg);
+  }
+  #sens.visible { display: flex; }
+  #sens input[type=range] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100px;
+    height: 2px;
+    background: var(--fg);
+    outline: none;
+  }
+  #sens input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 12px; height: 12px;
+    background: var(--fg);
+    border-radius: 50%;
+    cursor: pointer;
+  }
+  #sens input[type=range]::-moz-range-thumb {
+    width: 12px; height: 12px;
+    background: var(--fg);
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+  }
+
+  /* ---------- Splash gate (audio needs user gesture) ---------- */
+  #splash {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: var(--page-bg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    cursor: pointer;
+    transition: opacity 0.6s ease, background 0.4s ease;
+  }
+  #splash.hidden { opacity: 0; pointer-events: none; }
+  #splash .credits {
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    color: rgba(var(--fg-rgb), 0.5);
+    text-transform: uppercase;
+  }
+  #splash h1 {
+    font-size: 22px;
+    font-weight: 400;
+    font-style: italic;
+    letter-spacing: 0.01em;
+    color: var(--fg);
+  }
+  #splash .enter {
+    margin-top: 14px;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    color: var(--fg);
+    border: 1px solid var(--fg);
+    padding: 10px 22px;
+    text-transform: uppercase;
+  }
+  #splash .enter:hover { background: var(--fg); color: var(--page-bg); }
+
+  @media (max-width: 620px) {
+    #caption { font-size: 11px; }
+    #splash h1 { font-size: 17px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="splash">
+  <div class="credits">lolalevient × AIRMOW</div>
+  <h1>Bâton&nbsp;de&nbsp;pluies</h1>
+  <div class="enter">▶ Entrer</div>
+</div>
+
+<div id="canvas-wrap"></div>
+
+<div id="caption">
+  <div class="badge">1</div>
+  <div class="lines">
+    <div>TYPE : <span id="ui-type">MODÉRÉE</span></div>
+    <div>INTENSITÉ : <span id="ui-int">11%</span></div>
+    <div>SYNTH : NEIGE</div>
+    <div>GAMME : Cm</div>
+    <div>SOURCE : <span id="ui-src">PROCÉDURALE</span></div>
+  </div>
+</div>
+
+<div id="controls">
+  <button id="btn-theme" title="Basculer thème">◐</button>
+  <button id="btn-cam">📷 Caméra</button>
+  <button id="btn-flip" title="Basculer caméra avant/arrière">⇄</button>
+  <button id="btn-toggle">Pause</button>
+  <button id="btn-mute">Son</button>
+</div>
+
+<div id="sens">
+  <span>Sensibilité</span>
+  <input type="range" id="sens-slider" min="5" max="60" value="22">
+</div>
+
+<script>
+/* =========================================================
+   UN HOMMAGE À BÂTON DE PLUIES — after lolalevient × AIRMOW
+
+   Visual reference: two narrow vertical panels, centered,
+   on a warm off-white page.
+     LEFT  : a thin gray grid, with BLACK square pixels that
+             fall as rain and stick at the bottom. A few cells
+             also blink mid-grid as the drop passes.
+     RIGHT : a realistic rainy window — many static droplets
+             on the glass + occasional long streaks tracking
+             down through them, revealing brighter glass below.
+   Audio   : generative C minor, soft sine notes on each hit,
+             a slow pad in i–VI–III–VII, light noise rain layer.
+   ========================================================= */
+
+let layout = {
+  panelW: 0, panelH: 0, gap: 0,
+  leftRect: { x:0, y:0, w:0, h:0 },
+  rightRect:{ x:0, y:0, w:0, h:0 },
+};
+
+/* Grid (left) */
+let cellSize = 14;
+let cols = 0, rows = 0;
+let grid = [];
+let stack = [];
+let drops = [];
+
+/* Rainy window (right) */
+let trails = [];
+let windowBuffer = null; // pre-rendered static droplets
+
+/* UI / state */
+let intensity = 0.11;
+let smoothedIntensity = 0.11;
+let typeWord = "MODÉRÉE";
+let lastTypeChange = 0;
+let paused = false;
+let muted = false;
+
+/* ---------- Theme palettes (light = original; dark = night mode) ----------
+   `theme` is the active palette. It's swapped on demand and any p5 drawing
+   code that needs a color reads from here so a single toggle restyles
+   everything (page chrome via CSS vars, canvas via this object). */
+const THEMES = {
+  light: {
+    name: "light",
+    pageBg: [244, 242, 237],     // body / page
+    panelBg: [252, 251, 247],    // left grid panel paper
+    gridLine: [170, 170, 170, 130],
+    pixel:   [20, 20, 20],       // falling/landed/blink black squares
+    panelFrame: [30, 30, 30, 80],
+    // Procedural rainy-window palette
+    skyBase: 195,                // base luminance of the gray gradient
+    skyShift: 18,                // gradient amplitude
+    cloudLight: [225, 225, 230],
+    cloudDark:  [150, 155, 160],
+    dropletShadow: [80, 85, 90, 70],
+    dropletBody:  [170, 175, 180, 120],
+    dropletGlow:  [245, 247, 250, 180],
+    dropletSpec:  [255, 255, 255, 230],
+    dropletRim:   [60, 65, 70, 90],
+    streakWipe:   [235, 238, 240],
+    fadeStreak:   [225, 228, 230],
+  },
+  dark: {
+    name: "dark",
+    pageBg: [15, 15, 18],
+    panelBg: [22, 22, 26],
+    gridLine: [120, 118, 110, 55],   // very faint warm gridlines
+    pixel:   [232, 230, 223],        // off-white pixels glow against near-black
+    panelFrame: [232, 230, 223, 70],
+    // Night-window palette: deep slate with cool moonlit highlights
+    skyBase: 38,
+    skyShift: 14,
+    cloudLight: [55, 60, 70],
+    cloudDark:  [20, 22, 28],
+    dropletShadow: [0, 0, 0, 110],
+    dropletBody:  [60, 65, 75, 120],
+    dropletGlow:  [120, 140, 160, 170],
+    dropletSpec:  [220, 230, 240, 220],
+    dropletRim:   [180, 200, 220, 70],
+    streakWipe:   [150, 170, 190],
+    fadeStreak:   [80, 95, 110],
+  },
+};
+let theme = THEMES.light;
+
+/* Camera / motion-detection state */
+let camActive = false;            // true once getUserMedia stream is live
+let camVideo = null;              // <video> element holding the live stream
+let camGfx = null;                // p5.Graphics that we draw the camera into
+let prevFrame = null;             // p5.Image: previous frame for differencing
+let motionThreshold = 22;         // 0..255 brightness diff that counts as "motion"
+let columnMotion = [];            // motion intensity per grid column (0..1)
+let totalMotion = 0;              // overall motion this frame (0..1)
+let cameraFacing = "user";        // "user" = front (selfie), "environment" = rear
+
+/* Audio */
+let audioReady = false;
+let synth, padSynth, reverb, delay, noiseGain, noiseFilter, masterGain;
+const SCALE = [
+  "C3","Eb3","F3","G3","Bb3",
+  "C4","Eb4","F4","G4","Bb4",
+  "C5","Eb5","F5","G5",
+  "C6","Eb6"
+];
+
+/* =========================================================
+   CAMERA + MOTION DETECTION
+   ---------------------------------------------------------
+   The right panel can either show the procedural rainy window
+   OR a live webcam feed. When the camera is active, every
+   frame we:
+     1. Draw the camera into an offscreen p5.Graphics.
+     2. Compare it pixel-by-pixel to the previous frame.
+     3. For each grid column on the LEFT panel, compute how
+        much motion happened in the corresponding vertical
+        slice of the camera image.
+     4. Use that per-column motion to spawn drops on the grid.
+   So real movement on your window (rain, branches, your hand)
+   becomes drops + notes on the left side.
+   ========================================================= */
+async function enableCamera() {
+  if (camActive) return;
+  // Use p5's createCapture — it returns a p5-wrapped video element that
+  // p5's image() function can reliably draw onto the canvas. (Passing a raw
+  // <video> element works in some browsers but fails in others, including
+  // recent Chrome, with a "drawImage type" TypeError.)
+  try {
+    camVideo = createCapture({
+      video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: cameraFacing },
+      audio: false,
+    }, () => {
+      console.log("camera stream ready (" + cameraFacing + ")");
+    });
+    camVideo.size(640, 480);
+    camVideo.hide();
+
+    // Offscreen buffer for motion processing — small for speed.
+    // 96×72 is plenty for column-level motion detection and ~4× faster
+    // than 160×120. willReadFrequently tells Chrome to keep the canvas
+    // in CPU memory so loadPixels() each frame doesn't trigger a slow
+    // GPU→CPU copy.
+    camGfx = createGraphics(96, 72);
+    camGfx.pixelDensity(1);
+    if (camGfx.drawingContext && camGfx.drawingContext.canvas) {
+      // p5 doesn't expose this attribute directly, but we can reach
+      // through to the raw canvas and re-acquire the 2d context with
+      // the hint. Browsers that don't support the option just ignore it.
+      try {
+        camGfx.drawingContext.canvas.getContext("2d", { willReadFrequently: true });
+      } catch (e) { /* harmless if unsupported */ }
+    }
+    columnMotion = new Array(cols).fill(0);
+    camActive = true;
+    document.getElementById("ui-src").textContent = "CAMÉRA";
+    document.getElementById("btn-cam").classList.add("active");
+    document.getElementById("btn-cam").textContent = "📷 Procédural";
+    document.getElementById("sens").classList.add("visible");
+    document.getElementById("btn-flip").classList.add("visible");
+  } catch (err) {
+    console.warn("Camera permission denied or unavailable:", err);
+    // Common case on desktops: requested "environment" but only "user" exists.
+    // Retry once with the front camera before giving up.
+    if (cameraFacing === "environment") {
+      cameraFacing = "user";
+      console.log("Falling back to front camera.");
+      return enableCamera();
+    }
+    document.getElementById("ui-src").textContent = "PROCÉDURALE (caméra refusée)";
+    setTimeout(() => {
+      document.getElementById("ui-src").textContent = "PROCÉDURALE";
+    }, 4000);
+  }
+}
+
+function disableCamera() {
+  if (!camActive) return;
+  // Stop the underlying media tracks so the camera light goes off.
+  if (camVideo && camVideo.elt && camVideo.elt.srcObject) {
+    camVideo.elt.srcObject.getTracks().forEach(t => t.stop());
+  }
+  if (camVideo && camVideo.remove) camVideo.remove();
+  camVideo = null;
+  camActive = false;
+  prevFrame = null;
+  columnMotion = [];
+  totalMotion = 0;
+  document.getElementById("ui-src").textContent = "PROCÉDURALE";
+  document.getElementById("btn-cam").classList.remove("active");
+  document.getElementById("btn-cam").textContent = "📷 Caméra";
+  document.getElementById("sens").classList.remove("visible");
+  document.getElementById("btn-flip").classList.remove("visible");
+}
+
+/* Compute per-column motion by frame differencing and spawn drops accordingly.
+   Called once per draw() when camera is active.
+   Throttled to ~30Hz — motion detection at 60Hz is overkill and was
+   the main perf bottleneck. The visual response still feels instant. */
+let lastMotionTime = 0;
+function processCameraMotion() {
+  if (!camActive || !camVideo || !camVideo.elt || camVideo.elt.readyState < 2) return;
+  const now = performance.now();
+  if (now - lastMotionTime < 33) return;  // ~30 fps cap
+  lastMotionTime = now;
+
+  // 1) Draw current camera frame into the small offscreen buffer.
+  //    For the front camera we mirror horizontally so the user's view feels
+  //    natural (left of camera = left of grid, like a mirror). For the rear
+  //    camera we don't mirror — the world should appear as it actually is.
+  const w = camGfx.width, h = camGfx.height;
+  camGfx.push();
+  if (cameraFacing === "user") {
+    camGfx.translate(w, 0);
+    camGfx.scale(-1, 1);
+  }
+  camGfx.image(camVideo, 0, 0, w, h);
+  camGfx.pop();
+
+  // 2) Read pixels and compare to previous frame.
+  camGfx.loadPixels();
+  const cur = camGfx.pixels;
+  if (!prevFrame) {
+    // First frame: just store, nothing to compare yet.
+    prevFrame = new Uint8ClampedArray(cur);
+    return;
+  }
+
+  // 3) Per-column motion accumulator, then spawn drops.
+  const motionPerCol = new Array(cols).fill(0);
+  const samplesPerCol = new Array(cols).fill(0);
+
+  // Sample every 2nd pixel for speed (1/4 the work, still plenty of detail).
+  // We map the camera's x to a grid column.
+  for (let y = 0; y < h; y += 2) {
+    for (let x = 0; x < w; x += 2) {
+      const i = (y * w + x) * 4;
+      // Compare luminance (just R+G+B / 3 — fast & good enough).
+      const curLum = (cur[i] + cur[i+1] + cur[i+2]) / 3;
+      const preLum = (prevFrame[i] + prevFrame[i+1] + prevFrame[i+2]) / 3;
+      const diff = Math.abs(curLum - preLum);
+      if (diff > motionThreshold) {
+        const col = Math.floor((x / w) * cols);
+        motionPerCol[col] += diff - motionThreshold;
+      }
+      samplesPerCol[Math.floor((x / w) * cols)] += 1;
+    }
+  }
+
+  // Normalize per column to 0..1
+  let maxRaw = 0;
+  for (let c = 0; c < cols; c++) {
+    const norm = motionPerCol[c] / Math.max(1, samplesPerCol[c]);
+    motionPerCol[c] = norm;
+    if (norm > maxRaw) maxRaw = norm;
+  }
+  // Smooth column motion (so a single noisy frame doesn't blow up spawn rate)
+  for (let c = 0; c < cols; c++) {
+    columnMotion[c] = lerp(columnMotion[c] || 0, motionPerCol[c], 0.4);
+  }
+
+  // 4) Spawn drops based on column motion.
+  // Each column has a probability of spawning proportional to its motion.
+  // Strong motion can spawn multiple drops in the same column in one frame.
+  let frameMotionTotal = 0;
+  for (let c = 0; c < cols; c++) {
+    const m = columnMotion[c];
+    frameMotionTotal += m;
+    // Convert motion (0..~30) into a spawn probability and drop count.
+    const spawnP = Math.min(0.55, m * 0.04);
+    if (Math.random() < spawnP) spawnDrop(c);
+    if (m > 12 && Math.random() < 0.25) spawnDrop(c); // heavy motion → extra
+  }
+  totalMotion = Math.min(1, frameMotionTotal / (cols * 6));
+
+  // 5) Save current frame for next comparison.
+  prevFrame = new Uint8ClampedArray(cur);
+}
+
+/* =========================================================
+   p5 setup / resize
+   ========================================================= */
+function setup() {
+  const c = createCanvas(windowWidth, windowHeight);
+  c.parent("canvas-wrap");
+  // Cap pixel density to 1 — on retina displays p5 defaults to 2, which
+  // means the canvas is internally 4× the work for visually similar output.
+  // For this design (crisp blocks, soft droplets) 1 looks identical and
+  // runs ~4× faster.
+  pixelDensity(1);
+  computeLayout();
+  initGrid();
+  buildWindowTexture();
+  positionCaption();
+}
+
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
+  computeLayout();
+  initGrid();
+  buildWindowTexture();
+  positionCaption();
+}
+
+function computeLayout() {
+  // Two tall narrow panels, centered, with vertical margins for the caption
+  const isMobile = width < 620;
+  const verticalMargin = isMobile ? 60 : 80;
+  layout.panelH = height - verticalMargin * 2 - 90;
+  layout.panelW = Math.min(layout.panelH / 2.4, (width - 60) / 2.4);
+  layout.gap = Math.max(8, layout.panelW * 0.12);
+  const totalW = layout.panelW * 2 + layout.gap;
+  const startX = (width - totalW) / 2;
+  const startY = verticalMargin;
+
+  layout.leftRect  = { x: startX,                              y: startY, w: layout.panelW, h: layout.panelH };
+  layout.rightRect = { x: startX + layout.panelW + layout.gap, y: startY, w: layout.panelW, h: layout.panelH };
+
+  cellSize = Math.max(8, Math.round(layout.panelW / 28));
+}
+
+function initGrid() {
+  cols = Math.floor(layout.leftRect.w / cellSize);
+  rows = Math.floor(layout.leftRect.h / cellSize);
+  grid = Array.from({ length: cols }, () => new Array(rows).fill(0));
+  stack = new Array(cols).fill(rows);
+  drops = [];
+}
+
+function positionCaption() {
+  const cap = document.getElementById("caption");
+  cap.style.left = layout.leftRect.x + "px";
+  cap.style.top  = (layout.leftRect.y + layout.leftRect.h + 18) + "px";
+}
+
+/* =========================================================
+   RIGHT PANEL — procedural rainy window texture
+   ========================================================= */
+function buildWindowTexture() {
+  const w = Math.ceil(layout.rightRect.w);
+  const h = Math.ceil(layout.rightRect.h);
+  windowBuffer = createGraphics(w, h);
+  const g = windowBuffer;
+  g.pixelDensity(1);   // was 2 — halves work for the procedural rainy-window texture
+
+  const T = theme;
+
+  // Base sky gradient (silver-gray for light, slate-blue for dark)
+  for (let y = 0; y < h; y++) {
+    const t = y / h;
+    const lum = T.skyBase - T.skyShift * Math.abs(t - 0.42);
+    g.stroke(lum, lum, lum);
+    g.line(0, y, w, y);
+  }
+  // Cloudy mottling so it doesn't look flat
+  g.noStroke();
+  for (let i = 0; i < 25; i++) {
+    const c = T.cloudLight;
+    g.fill(c[0] + Math.random() * 25, c[1] + Math.random() * 25, c[2] + Math.random() * 25, 8 + Math.random() * 10);
+    g.ellipse(Math.random() * w, Math.random() * h, 60 + Math.random() * 220, 60 + Math.random() * 220);
+  }
+  for (let i = 0; i < 18; i++) {
+    const c = T.cloudDark;
+    g.fill(c[0], c[1], c[2], 8 + Math.random() * 12);
+    g.ellipse(Math.random() * w, Math.random() * h, 80 + Math.random() * 250, 80 + Math.random() * 250);
+  }
+
+  // Static droplets — same density across themes, color comes from theme
+  const layers = [
+    { n: Math.floor(w * h / 140),  rMin: 0.5, rMax: 1.4 },
+    { n: Math.floor(w * h / 700),  rMin: 1.4, rMax: 2.6 },
+    { n: Math.floor(w * h / 2800), rMin: 2.6, rMax: 4.5 },
+    { n: Math.floor(w * h / 9000), rMin: 4.5, rMax: 8   },
+  ];
+  for (const L of layers) {
+    for (let i = 0; i < L.n; i++) {
+      drawDroplet(g, Math.random() * w, Math.random() * h,
+                  L.rMin + Math.random() * (L.rMax - L.rMin));
+    }
+  }
+
+  // A few faint pre-existing streaks already on the glass
+  for (let i = 0; i < 6; i++) {
+    drawFaintStreak(g, Math.random() * w, Math.random() * h * 0.5, 40 + Math.random() * 180);
+  }
+}
+
+function drawDroplet(g, x, y, r) {
+  const T = theme;
+  g.noStroke();
+
+  // Soft shadow under/right
+  g.fill(...T.dropletShadow);
+  g.ellipse(x + r * 0.2, y + r * 0.25, r * 2.0, r * 2.0);
+
+  // Body (semi-transparent so the sky shows through)
+  g.fill(...T.dropletBody);
+  g.ellipse(x, y, r * 2, r * 2);
+
+  // Lower-right inner glow — light bending through the drop
+  g.fill(...T.dropletGlow);
+  g.ellipse(x + r * 0.25, y + r * 0.35, r * 1.0, r * 1.0);
+
+  // Specular highlight upper-left
+  g.fill(...T.dropletSpec);
+  g.ellipse(x - r * 0.35, y - r * 0.35, Math.max(0.6, r * 0.45), Math.max(0.6, r * 0.45));
+
+  // Meniscus rim — dark in light theme, light in dark theme
+  g.noFill();
+  g.stroke(...T.dropletRim);
+  g.strokeWeight(Math.max(0.4, r * 0.08));
+  g.ellipse(x, y, r * 2, r * 2);
+  g.noStroke();
+}
+
+function drawFaintStreak(g, x, yStart, len) {
+  g.noStroke();
+  const c = theme.fadeStreak;
+  for (let i = 0; i < len; i++) {
+    const a = 20 * (1 - i / len);
+    g.fill(c[0], c[1], c[2], a);
+    g.rect(x, yStart + i, 1.4, 1);
+  }
+}
+
+function spawnTrail() {
+  trails.push({
+    x: Math.random() * layout.rightRect.w,
+    y: -10,
+    vy: 1.2 + Math.random() * 2.5,
+    life: 0,
+    maxLife: 200 + Math.random() * 220,
+    headR: 2.5 + Math.random() * 3.5,
+    width: 2 + Math.random() * 2.5,
+  });
+}
+
+function updateTrails() {
+  if (Math.random() < 0.02 + smoothedIntensity * 0.10) spawnTrail();
+  for (let i = trails.length - 1; i >= 0; i--) {
+    const t = trails[i];
+    t.vy += 0.04;
+    t.y += t.vy;
+    t.life++;
+    if (t.y > layout.rightRect.h + 20 || t.life > t.maxLife) trails.splice(i, 1);
+  }
+}
+
+function drawWindowPanel() {
+  const R = layout.rightRect;
+  push();
+
+  if (camActive && camVideo && camVideo.elt && camVideo.elt.readyState >= 2) {
+    // ---- Live camera feed mode ----
+    drawingContext.save();
+    drawingContext.beginPath();
+    drawingContext.rect(R.x, R.y, R.w, R.h);
+    drawingContext.clip();
+
+    // Cover-fit so the video fills the panel without distortion.
+    const vw = camVideo.elt.videoWidth || 640;
+    const vh = camVideo.elt.videoHeight || 480;
+    const panelAspect = R.w / R.h;
+    const videoAspect = vw / vh;
+    let dw, dh;
+    if (videoAspect > panelAspect) {
+      dh = R.h;
+      dw = R.h * videoAspect;
+    } else {
+      dw = R.w;
+      dh = R.w / videoAspect;
+    }
+    const dx = R.x + (R.w - dw) / 2;
+    const dy = R.y + (R.h - dh) / 2;
+
+    // Mirror horizontally for the front camera (selfie-style); show the
+    // rear camera as-is so what you point at appears as it is.
+    push();
+    if (cameraFacing === "user") {
+      translate(dx + dw, dy);
+      scale(-1, 1);
+      image(camVideo, 0, 0, dw, dh);
+    } else {
+      image(camVideo, dx, dy, dw, dh);
+    }
+    pop();
+
+    drawingContext.restore();
+  } else {
+    // ---- Procedural rainy-window mode (fallback / default) ----
+    image(windowBuffer, R.x, R.y, R.w, R.h);
+
+    drawingContext.save();
+    drawingContext.beginPath();
+    drawingContext.rect(R.x, R.y, R.w, R.h);
+    drawingContext.clip();
+
+    noStroke();
+    const sw = theme.streakWipe;
+    for (const t of trails) {
+      const trailLen = Math.min(t.y + 10, 180 + smoothedIntensity * 60);
+      for (let k = 0; k < trailLen; k += 2) {
+        const py = t.y - k;
+        if (py < -10) break;
+        const a = 55 * (1 - k / trailLen);
+        fill(sw[0], sw[1], sw[2], a);
+        rect(R.x + t.x - t.width / 2, R.y + py, t.width, 2);
+      }
+      const hx = R.x + t.x, hy = R.y + t.y;
+      // Drop head — uses droplet shadow/body/spec colors so it matches the texture
+      fill(...theme.dropletShadow.slice(0, 3), 140);
+      ellipse(hx + 1, hy + 1, t.headR * 2.2, t.headR * 2.2);
+      fill(sw[0], sw[1], sw[2], 220);
+      ellipse(hx, hy, t.headR * 2, t.headR * 2);
+      fill(...theme.dropletSpec);
+      ellipse(hx - t.headR * 0.3, hy - t.headR * 0.3, t.headR * 0.7, t.headR * 0.7);
+    }
+
+    drawingContext.restore();
+  }
+
+  // Thin frame around the panel (always)
+  noFill();
+  stroke(...theme.panelFrame);
+  strokeWeight(1);
+  rect(R.x + 0.5, R.y + 0.5, R.w - 1, R.h - 1);
+  pop();
+}
+
+/* =========================================================
+   LEFT PANEL — paper grid + black falling pixels
+   ========================================================= */
+function drawGridPanel() {
+  const L = layout.leftRect;
+  push();
+
+  // Panel paper
+  noStroke();
+  fill(...theme.panelBg);
+  rect(L.x, L.y, L.w, L.h);
+
+  drawingContext.save();
+  drawingContext.beginPath();
+  drawingContext.rect(L.x, L.y, L.w, L.h);
+  drawingContext.clip();
+
+  // Thin grid lines
+  stroke(...theme.gridLine);
+  strokeWeight(1);
+  for (let c = 0; c <= cols; c++) {
+    const x = L.x + c * cellSize + 0.5;
+    line(x, L.y, x, L.y + rows * cellSize);
+  }
+  for (let r = 0; r <= rows; r++) {
+    const y = L.y + r * cellSize + 0.5;
+    line(L.x, y, L.x + cols * cellSize, y);
+  }
+
+  // Mid-grid blinks — crisp on/off pixels
+  noStroke();
+  fill(...theme.pixel);
+  for (let c = 0; c < cols; c++) {
+    for (let r = 0; r < rows; r++) {
+      const v = grid[c][r];
+      if (v > 0.5) {
+        rect(L.x + c * cellSize + 1, L.y + r * cellSize + 1, cellSize - 1, cellSize - 1);
+        grid[c][r] -= 0.03;
+      } else if (v > 0) {
+        grid[c][r] = 0;
+      }
+    }
+  }
+
+  // Stacked landed pixels
+  for (let c = 0; c < cols; c++) {
+    for (let r = stack[c]; r < rows; r++) {
+      rect(L.x + c * cellSize + 1, L.y + r * cellSize + 1, cellSize - 1, cellSize - 1);
+    }
+  }
+
+  // Active falling drops
+  for (const d of drops) {
+    rect(L.x + d.col * cellSize + 1, L.y + d.y + 1, cellSize - 1, cellSize - 1);
+  }
+
+  drawingContext.restore();
+
+  // Outer frame
+  noFill();
+  stroke(...theme.panelFrame);
+  strokeWeight(1);
+  rect(L.x + 0.5, L.y + 0.5, L.w - 1, L.h - 1);
+  pop();
+}
+
+function spawnDrop(col, opts = {}) {
+  if (col < 0 || col >= cols) return;
+  if (stack[col] <= 1) return;
+  drops.push({
+    col,
+    y: opts.y ?? -cellSize * (1 + Math.random() * 5),
+    vy: 3.5 + Math.random() * 4.5,
+    flicker: Math.random() < 0.55,
+  });
+}
+
+function updateDrops() {
+  // When the camera drives drops, skip the procedural ambient spawn entirely —
+  // we want the only source of new drops to be real motion. Otherwise the
+  // installation falls back to its quiet self-generating rain.
+  if (!camActive) {
+    const spawnProb = 0.03 + smoothedIntensity * 0.10;
+    if (Math.random() < spawnProb) {
+      spawnDrop(Math.floor(Math.random() * cols));
+    }
+  }
+
+  for (let i = drops.length - 1; i >= 0; i--) {
+    const d = drops[i];
+    d.y += d.vy;
+
+    // Rarely, a drop "triggers" a single mid-grid pixel to blink solid black.
+    // Very sparse — typical scene has 0–2 mid-grid blinks at a time.
+    if (d.flicker && Math.random() < 0.005) {
+      const r = Math.floor(Math.random() * (rows - 1));
+      const cOff = Math.floor(Math.random() * cols);
+      if (grid[cOff][r] < 0.1) {
+        grid[cOff][r] = 1.0;
+        d.flicker = false;
+      }
+    }
+
+    // Land on top of stack
+    const landRow = stack[d.col] - 1;
+    if (d.y >= landRow * cellSize && landRow >= 0) {
+      stack[d.col] = landRow;
+      triggerNoteFromHit(d.col, landRow);
+      drops.splice(i, 1);
+    } else if (d.y >= rows * cellSize) {
+      drops.splice(i, 1);
+    }
+  }
+
+  // Erosion: pixels at the bottom evaporate so the stack stays sparse
+  if (Math.random() < 0.12) {
+    const c = Math.floor(Math.random() * cols);
+    if (stack[c] < rows) stack[c]++;
+  }
+  if (Math.random() < smoothedIntensity * 0.25) {
+    const c = Math.floor(Math.random() * cols);
+    if (stack[c] < rows) stack[c]++;
+  }
+}
+
+/* =========================================================
+   MAIN DRAW
+   ========================================================= */
+function draw() {
+  background(...theme.pageBg);
+  drawGridPanel();
+  drawWindowPanel();
+  if (!paused) {
+    if (camActive) processCameraMotion();
+    updateDrops();
+    updateTrails();
+  }
+  updateIntensity();
+  updateAudioFromIntensity();
+  updateUI();
+  maybeCycleType();
+}
+
+function updateIntensity() {
+  // Count solid-black active pixels
+  let blinkCount = 0;
+  for (let c = 0; c < cols; c++)
+    for (let r = 0; r < rows; r++)
+      if (grid[c][r] > 0.5) blinkCount++;
+
+  let stackCount = 0;
+  for (let c = 0; c < cols; c++) stackCount += (rows - stack[c]);
+
+  // Recalibrated: sparse scenes should read low, dense ones high.
+  // A scene with ~20 falling drops + a few stacked = ~50%.
+  const raw = constrain(
+    (drops.length / 25) * 0.35 +
+    (blinkCount / 15) * 0.25 +
+    (stackCount / (cols * 6)) * 0.45,
+    0, 1
+  );
+  intensity = raw;
+  smoothedIntensity = lerp(smoothedIntensity, intensity, 0.03);
+}
+
+function updateUI() {
+  document.getElementById("ui-int").textContent = Math.round(smoothedIntensity * 100) + "%";
+}
+
+function maybeCycleType() {
+  if (millis() - lastTypeChange < 7000 + Math.random() * 9000) return;
+  lastTypeChange = millis();
+  const i = smoothedIntensity;
+  const bag = i < 0.3 ? ["LÉGÈRE","LÉGÈRE","MODÉRÉE"]
+            : i < 0.65 ? ["MODÉRÉE","MODÉRÉE","FORTE","LÉGÈRE"]
+                       : ["FORTE","FORTE","MODÉRÉE"];
+  typeWord = bag[Math.floor(Math.random() * bag.length)];
+  document.getElementById("ui-type").textContent = typeWord;
+}
+
+/* =========================================================
+   AUDIO
+   ========================================================= */
+async function initAudio() {
+  if (audioReady) return;
+  await Tone.start();
+  masterGain = new Tone.Gain(0.85).toDestination();
+  reverb = new Tone.Reverb({ decay: 8, wet: 0.55 }).connect(masterGain);
+  delay  = new Tone.FeedbackDelay({ delayTime: "8n.", feedback: 0.45, wet: 0.35 }).connect(reverb);
+
+  synth = new Tone.PolySynth(Tone.Synth, {
+    oscillator: { type: "sine" },
+    envelope: { attack: 0.005, decay: 0.4, sustain: 0.0, release: 1.6 },
+    volume: -10,
+  }).connect(delay);
+
+  padSynth = new Tone.PolySynth(Tone.Synth, {
+    oscillator: { type: "sawtooth" },
+    envelope: { attack: 4, decay: 2, sustain: 0.7, release: 6 },
+    volume: -28,
+  });
+  const padFilter = new Tone.Filter(450, "lowpass").connect(reverb);
+  padSynth.connect(padFilter);
+
+  const noise = new Tone.Noise("brown").start();
+  noiseFilter = new Tone.Filter(700, "bandpass");
+  noiseFilter.Q.value = 0.6;
+  noiseGain = new Tone.Gain(0.0).connect(masterGain);
+  noise.connect(noiseFilter);
+  noiseFilter.connect(noiseGain);
+  const lfo = new Tone.LFO(0.08, 400, 1100).start();
+  lfo.connect(noiseFilter.frequency);
+
+  audioReady = true;
+  startPadLoop();
+}
+
+function startPadLoop() {
+  const chords = [
+    ["C3","Eb3","G3","Bb3"],
+    ["Ab2","C3","Eb3","G3"],
+    ["Eb3","G3","Bb3","D4"],
+    ["Bb2","D3","F3","Ab3"],
+  ];
+  let idx = 0;
+  Tone.Transport.scheduleRepeat((time) => {
+    if (!audioReady || muted) return;
+    padSynth.triggerAttackRelease(chords[idx % chords.length], "2m", time);
+    idx++;
+  }, "2m");
+  Tone.Transport.bpm.value = 70;
+  Tone.Transport.start();
+}
+
+function updateAudioFromIntensity() {
+  if (!audioReady) return;
+  const padTarget = -34 + smoothedIntensity * 18;
+  if (padSynth) padSynth.volume.rampTo(muted ? -60 : padTarget, 0.4);
+  if (noiseGain) noiseGain.gain.rampTo(muted ? 0 : 0.04 + smoothedIntensity * 0.18, 0.4);
+}
+
+function triggerNoteFromHit(col, row) {
+  if (!audioReady || muted) return;
+  if (drops.length > 60) return;
+  const idx = Math.floor(map(col, 0, cols, 0, SCALE.length - 1));
+  const note = Math.random() < 0.18
+    ? Tone.Frequency(SCALE[idx]).transpose(12).toNote()
+    : SCALE[idx];
+  const vel = constrain(0.18 + (row / rows) * 0.5, 0.15, 0.7);
+  synth.triggerAttackRelease(note, "8n", undefined, vel);
+}
+
+/* =========================================================
+   Input
+   ========================================================= */
+function mouseMoved()  { addDropsAtPointer(0.18, 1); }
+function mouseDragged(){ addDropsAtPointer(0.6, 3); }
+function mousePressed(){
+  if (!audioReady) initAudio();
+  addDropsAtPointer(1.0, 5);
+}
+function touchMoved()  { addDropsAtPointer(0.5, 2); return false; }
+
+function addDropsAtPointer(prob, count) {
+  if (paused) return;
+  const L = layout.leftRect;
+  if (mouseX < L.x || mouseX > L.x + L.w || mouseY < L.y || mouseY > L.y + L.h) return;
+  if (Math.random() > prob) return;
+  const col = Math.floor((mouseX - L.x) / cellSize);
+  for (let i = 0; i < count; i++) {
+    const c = constrain(col + Math.floor((Math.random() - 0.5) * 4), 0, cols - 1);
+    spawnDrop(c, { y: -cellSize * (1 + Math.random() * 3) });
+  }
+}
+
+/* =========================================================
+   Splash + controls
+   ========================================================= */
+const splash = document.getElementById("splash");
+splash.addEventListener("click", async () => {
+  // Always hide the splash, even if audio fails (e.g. CDN blocked)
+  splash.classList.add("hidden");
+  setTimeout(() => splash.style.display = "none", 700);
+  try { await initAudio(); } catch (err) { console.warn("audio init failed:", err); }
+});
+
+document.getElementById("btn-toggle").addEventListener("click", (e) => {
+  paused = !paused;
+  e.currentTarget.textContent = paused ? "Lecture" : "Pause";
+});
+document.getElementById("btn-mute").addEventListener("click", (e) => {
+  muted = !muted;
+  e.currentTarget.classList.toggle("muted", muted);
+  if (audioReady) masterGain.gain.rampTo(muted ? 0 : 0.85, 0.3);
+});
+document.getElementById("btn-cam").addEventListener("click", () => {
+  if (camActive) disableCamera(); else enableCamera();
+});
+document.getElementById("btn-flip").addEventListener("click", async () => {
+  // Toggle between front (user) and rear (environment) cameras.
+  // Most useful on phones / iPads — desktops typically only have the front
+  // camera, in which case getUserMedia will reject the rear request and
+  // we'll fall back to whatever's available.
+  cameraFacing = (cameraFacing === "user") ? "environment" : "user";
+  if (camActive) {
+    disableCamera();
+    // Small delay before re-enabling — gives the previous stream's tracks
+    // time to fully release so the new request can grab the device.
+    await new Promise(r => setTimeout(r, 150));
+    await enableCamera();
+  }
+});
+document.getElementById("sens-slider").addEventListener("input", (e) => {
+  // Lower slider value = MORE sensitive (lower threshold for what counts as motion).
+  // We invert: slider 5..60 -> threshold 60..5
+  motionThreshold = 65 - parseInt(e.target.value, 10);
+});
+
+/* ---------- Theme: toggle button + system preference auto-detect ---------- */
+function applyTheme(name) {
+  theme = THEMES[name] || THEMES.light;
+  if (name === "dark") document.body.classList.add("dark");
+  else document.body.classList.remove("dark");
+  // The procedural rainy-window texture is pre-rendered with theme colors,
+  // so rebuild it whenever the theme changes.
+  if (windowBuffer) buildWindowTexture();
+}
+
+let userOverrodeTheme = false;
+document.getElementById("btn-theme").addEventListener("click", () => {
+  userOverrodeTheme = true;
+  applyTheme(theme.name === "dark" ? "light" : "dark");
+});
+
+// Auto-detect the system preference on load + react to live changes
+// (until the user manually overrides via the toggle button).
+if (window.matchMedia) {
+  const mq = window.matchMedia("(prefers-color-scheme: dark)");
+  if (mq.matches) applyTheme("dark");
+  const handler = (e) => { if (!userOverrodeTheme) applyTheme(e.matches ? "dark" : "light"); };
+  if (mq.addEventListener) mq.addEventListener("change", handler);
+  else if (mq.addListener) mq.addListener(handler); // older browsers
+}
+</script>
+</body>
+</html>
