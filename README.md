@@ -4,6 +4,8 @@ A browser-based recreation and reinterpretation of the audiovisual installation 
 
 > 🎨 The original work belongs to its makers. This is a recreation, built to learn from it. See [ESSAY.md](./ESSAY.md) for the full story behind this project.
 
+**[▶ Try it live](https://annbjer.github.io/un-hommage-a-baton-de-pluies/un-hommage-a-baton-de-pluies.html)** — runs entirely in your browser, webcam included.
+
 ![Screenshot placeholder — replace with your own](./docs/screenshot.png)
 
 ---
