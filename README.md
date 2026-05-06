@@ -1,6 +1,6 @@
 # Un hommage à Bâton de pluies
 
-A browser-based recreation and reinterpretation of the audiovisual installation [*Bâton de pluies*](https://ilpleut.studio) by **[lolalevient](https://www.instagram.com/ilpleut.studio)** and **[AIRMOW](https://www.instagram.com/airmowmusic)**, extended with live webcam motion detection so any movement in front of your camera — leaves outside a window, blinking server LEDs, falling rain — composes generative ambient music in C minor.
+A browser-based recreation and reinterpretation of the audiovisual installation [*Bâton de pluies*](https://ilpleut.studio) by **[lolalevient](https://www.instagram.com/lolalevient/)** and **[AIRMOW](https://www.instagram.com/airmowmusic)**, extended with live webcam motion detection so any movement in front of your camera — leaves outside a window, blinking server LEDs, falling rain — composes generative ambient music in C minor.
 
 > 🎨 The original work belongs to its makers. This is a recreation, built to learn from it. See [ESSAY.md](./ESSAY.md) for the full story behind this project.
 
@@ -94,7 +94,7 @@ The webcam feed never leaves your device. There is no server-side component to t
 
 ## Credits & inspiration
 
-- **[lolalevient](https://www.instagram.com/ilpleut.studio) & [AIRMOW](https://www.instagram.com/airmowmusic)** — for *Bâton de pluies*, the original installation that inspired this recreation. Go look at their work.
+- **[lolalevient](https://www.instagram.com/lolalevient) & [AIRMOW](https://www.instagram.com/airmowmusic)** — for *Bâton de pluies*, the original installation that inspired this recreation. Go look at their work.
 - **[@FigsFromPlums](https://x.com/FigsFromPlums/status/2048749126439829716)** — for sharing the video that introduced me to it.
 - **[p5.js](https://p5js.org)** by the Processing Foundation — the creative coding library that does most of the heavy lifting on the visual side.
 - **[Tone.js](https://tonejs.github.io)** by Yotam Mann — the Web Audio framework that makes the generative sound possible.
