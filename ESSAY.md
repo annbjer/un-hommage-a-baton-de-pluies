@@ -4,7 +4,7 @@
 
 ---
 
-A few weeks ago I came across a video on X by [@FigsFromPlums](https://x.com/FigsFromPlums/status/2048749126439829716) showing an audiovisual piece called *Bâton de pluies* by [lolalevient](https://www.instagram.com/ilpleut.studio) and [AIRMOW](https://www.instagram.com/airmowmusic). Two narrow vertical panels, side by side. On the left, a thin gray grid where black square pixels fell like rain and stuck briefly at the bottom. On the right, a video of a rainy window, water beading on glass.
+A few weeks ago I came across a video on X by [@FigsFromPlums](https://x.com/FigsFromPlums/status/2048749126439829716) showing an audiovisual piece called *Bâton de pluies* by [lolalevient](https://www.instagram.com/lolalevient/) and [AIRMOW](https://www.instagram.com/airmowmusic). Two narrow vertical panels, side by side. On the left, a thin gray grid where black square pixels fell like rain and stuck briefly at the bottom. On the right, a video of a rainy window, water beading on glass.
 
 It was quiet, deliberate, and physically musical, each pixel that landed playing a soft note, and the whole thing felt like a rain stick tuned to C minor. I watched the video several times. I wanted to know how it worked.
 
