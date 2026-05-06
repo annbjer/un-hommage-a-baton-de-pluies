@@ -14,7 +14,7 @@ I'm a designer, tinkerer and occasional weekend electronic music hobbyist. I rea
 
 It's a single HTML file that opens in any modern browser. Two panels, like the original. The left panel is a paper-white grid where black pixels fall, accumulate, and erode away. The right panel is procedurally generated, hundreds of tiny water droplets rendered as actual little 3D-looking beads on silver-gray glass, with occasional streaks running down through them. Above and below sit the same minimalist French labels, with `INTENSITÉ` updating live based on how much rain is falling.
 
-Apart from the procedural rain-feed in the right panel we also added the ability to use a webcam to trigger the input. Point the camera at anything that moves, like leaves outside your window, a bird feeder, the blinking lights on a server rack — and the motion in the camera image triggers droplets on the grid. Each droplet plays a note in C minor pentatonic, with the column position mapped to pitch (so motion on the left of the camera plays low notes, motion on the right plays high notes). A slow drone pad cycles underneath in i–VI–III–VII. Brown noise, filtered through a slow LFO, gives the whole thing the suggestion of rainfall.
+Apart from the procedural rain-feed in the right panel we also added the ability to use a webcam to trigger the input. Point the camera at anything that moves, like leaves outside your window, a bird feeder, the blinking lights on a server rack, and the motion in the camera image triggers droplets on the grid. Each droplet plays a note in C minor pentatonic, with the column position mapped to pitch (so motion on the left of the camera plays low notes, motion on the right plays high notes). A slow drone pad cycles underneath in i–VI–III–VII. Brown noise, filtered through a slow LFO, gives the whole thing the suggestion of rainfall.
 
 I've been pointing my Sigma fp out of my studio window at a tree. As the leaves catch wind, melodies emerge. Not melodies I composed, but melodies the *wind* composed, transcribed through motion detection, voiced through C minor. I've been layering soft sine tones from my Teenage Engineering TX-6 over the top. It's the closest I've ever come to making *musique concrète* at the speed of weather.
 
@@ -22,24 +22,24 @@ A dark mode follows your system preference. At night, off-white pixels fall on a
 
 ## Is this okay?
 
-I think this is the more interesting question, and I want to answer it plainly rather than apologetically.
+Fair question. I asked myself the same thing.
 
-I did not make *Bâton de pluies*. lolalevient and AIRMOW made *Bâton de pluies*. What I made is a recreation, informed by a single screenshot and a video, built in conversation with an AI, extended in directions the original wasn't built to go. **It does not have the soul of the original.** The original is an installation, sited and physical. Mine is a browser tab.
+I didn't make *Bâton de pluies*. lolalevient and AIRMOW made *Bâton de pluies*. What I made is a browser-based homage, a recreation built from a screenshot, a video, a lot of curiosity, and a long conversation with Claude. It's not the same thing. The original is physical, spatial, alive in a room. Mine runs in a tab.
 
-But recreation in pursuit of understanding is how humans have always learned from art. Renaissance painters copied masters to learn how light works. Jazz musicians transcribe solos by ear. Composers write fugues in the style of Bach not to fool anyone but to understand counterpoint from the inside. The act of trying to make something yourself even when, or *especially* when, you fail to match it, teaches you what makes the original good.
+But trying to recreate something is one of the oldest ways to learn from it. Painters copy paintings. Musicians transcribe solos by ear. You don't do it to claim you invented the thing, you do it because taking something apart and putting it back together is how you find where the magic actually lives.
 
-What's new is that I could do this without already being a programmer. Claude let me bring my eye for design and my ear for music to a medium I couldn't previously touch. I described what I was seeing; it offered code. That collaboration is not the same as copying. It's closer to learning a language by speaking it badly to a patient teacher until you start speaking it well.
+Claude made it possible for me to work in a medium I don't normally have access to. I could describe what I saw and heard, the falling shapes, the camera movement, rain turning into music, and it helped translate that into code. Not perfectly, not instantly, but enough that I could keep pushing, adjusting, breaking things, fixing them, and slowly understanding more.
 
-Three things make this ethical to me:
+So no, I don't see this as claiming someone else's work. I see it as a study. The original artists are credited, this is explicitly a recreation, and the code is open for anyone to learn from or take somewhere new.
 
-1. **Attribution.** The original artists are named, linked, and credited as the inspiration. I am explicit that this is a recreation, not an original work.
-2. **Recreation, not impersonation.** I'm not claiming I made *Bâton de pluies*. I'm sharing what I learned by trying to understand it.
-3. **Open, so others can extend it.** The code is on GitHub. If anyone else wants to fork it, build on it, or use it as a jumping-off point for their own piece, please do.
+I started by trying to understand someone else's beautiful idea. I ended up with a tool, a process, and a little more confidence that I can make things like this myself.
+
+Mine is a sketch from a video. Theirs is the work.
 
 
 ## What I learned
 
-- How procedural rendering of water droplets works (shadow, body, refractive glow, specular highlight, dark meniscus rim — five layered ellipses per drop, drawn once into an offscreen buffer).
+- How procedural rendering of water droplets works (shadow, body, refractive glow, specular highlight, dark meniscus rim, five layered ellipses per drop, drawn once into an offscreen buffer).
 - How frame-differencing motion detection works (subtract the previous frame from the current; pixels that differ above a threshold are motion).
 - How `getUserMedia` and the modern browser camera API work, and why localhost vs. file:// URLs behave differently for privacy permissions.
 - How Tone.js routes voices through reverb and delay buses; how column-position can be mapped to a pentatonic scale; how a slow LFO sweeping a band-pass filter on brown noise sounds remarkably like distant rain.

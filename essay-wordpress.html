@@ -1,0 +1,75 @@
+<!-- Recreating Bâton de pluies — WordPress-ready HTML -->
+<!-- Paste this into a Custom HTML block (Gutenberg) or the Text tab (Classic Editor) -->
+
+<p style="font-style: italic; color: #666; margin-bottom: 2em;">On curiosity, recreation, and what AI changes (and doesn't change) about how we learn from art.</p>
+
+<hr />
+
+<p>A few weeks ago I came across a video on X by <a href="https://x.com/FigsFromPlums/status/2048749126439829716" target="_blank" rel="noopener">@FigsFromPlums</a> showing an audiovisual piece called <em>Bâton de pluies</em> by <a href="https://www.instagram.com/ilpleut.studio" target="_blank" rel="noopener">lolalevient</a> and <a href="https://www.instagram.com/airmowmusic" target="_blank" rel="noopener">AIRMOW</a>. Two narrow vertical panels, side by side. On the left, a thin gray grid where black square pixels fell like rain and stuck briefly at the bottom. On the right, a video of a rainy window, water beading on glass.</p>
+
+<p>It was quiet, deliberate, and physically musical, each pixel that landed playing a soft note, and the whole thing felt like a rain stick tuned to C minor. I watched the video several times. I wanted to know how it worked.</p>
+
+<p>I'm a designer, tinkerer and occasional weekend electronic music hobbyist. I read code reasonably well but I don't write applications from scratch. Five years ago, "I want to know how that works" would have stayed a thought. This week, I sat down with Claude (Opus 4.7) and we built our own interpretation of it together over the course of a few conversations.</p>
+
+<h2>What we made</h2>
+
+<p>It's a single HTML file that opens in any modern browser. Two panels, like the original. The left panel is a paper-white grid where black pixels fall, accumulate, and erode away. The right panel is procedurally generated, hundreds of tiny water droplets rendered as actual little 3D-looking beads on silver-gray glass, with occasional streaks running down through them. Above and below sit the same minimalist French labels, with <code>INTENSIT&Eacute;</code> updating live based on how much rain is falling.</p>
+
+<!-- App view video — shows the full browser interface with both panels -->
+<figure style="margin: 2em 0; text-align: center;">
+  <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%;">
+    <iframe src="https://www.youtube.com/embed/jgCWnZTmzS8?rel=0&modestbranding=1" title="Un hommage à Bâton de pluies — app view" frameborder="0" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe>
+  </div>
+  <figcaption style="font-size: 0.85em; color: #888; margin-top: 0.75em;">App view — the full interface with procedural rain panel and generative audio in C minor.</figcaption>
+</figure>
+
+<p>Apart from the procedural rain-feed in the right panel we also added the ability to use a webcam to trigger the input. Point the camera at anything that moves, like leaves outside your window, a bird feeder, the blinking lights on a server rack, and the motion in the camera image triggers droplets on the grid. Each droplet plays a note in C minor pentatonic, with the column position mapped to pitch (so motion on the left of the camera plays low notes, motion on the right plays high notes). A slow drone pad cycles underneath in i–VI–III–VII. Brown noise, filtered through a slow LFO, gives the whole thing the suggestion of rainfall.</p>
+
+<p>I've been pointing my Sigma fp out of my studio window at a tree. As the leaves catch wind, melodies emerge. Not melodies I composed, but melodies the <em>wind</em> composed, transcribed through motion detection, voiced through C minor. I've been layering soft sine tones from my Teenage Engineering TX-6 over the top. It's the closest I've ever come to making <em>musique concr&egrave;te</em> at the speed of weather.</p>
+
+<!-- Window view video — Magnolia tree with layered sine waves from TX-6 -->
+<figure style="margin: 2em 0; text-align: center;">
+  <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%;">
+    <iframe src="https://www.youtube.com/embed/GDDuRP3dRfg?rel=0&modestbranding=1" title="Un hommage à Bâton de pluies — window view" frameborder="0" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe>
+  </div>
+  <figcaption style="font-size: 0.85em; color: #888; margin-top: 0.75em;">Window view — Magnolia tree driving the generative audio, with layered sine waves from the TX-6.</figcaption>
+</figure>
+
+<p>A dark mode follows your system preference. At night, off-white pixels fall on a near-black grid like snow, and the right panel becomes a starscape of moonlit droplets. With the camera pointing at the rack at night, blinking activity LEDs become an ambient instrument that plays itself based on what your servers are doing.</p>
+
+<h2>Is this okay?</h2>
+
+<p>Fair question. I asked myself the same thing.</p>
+
+<p>I didn't make <em>Bâton de pluies</em>. lolalevient and AIRMOW made <em>Bâton de pluies</em>. What I made is a browser-based homage, a recreation built from a screenshot, a video, a lot of curiosity, and a long conversation with Claude. It's not the same thing. The original is physical, spatial, alive in a room. Mine runs in a tab.</p>
+
+<p>But trying to recreate something is one of the oldest ways to learn from it. Painters copy paintings. Musicians transcribe solos by ear. You don't do it to claim you invented the thing, you do it because taking something apart and putting it back together is how you find where the magic actually lives.</p>
+
+<p>Claude made it possible for me to work in a medium I don't normally have access to. I could describe what I saw and heard, the falling shapes, the camera movement, rain turning into music, and it helped translate that into code. Not perfectly, not instantly, but enough that I could keep pushing, adjusting, breaking things, fixing them, and slowly understanding more.</p>
+
+<p>So no, I don't see this as claiming someone else's work. I see it as a study. The original artists are credited, this is explicitly a recreation, and the code is open for anyone to learn from or take somewhere new.</p>
+
+<p>I started by trying to understand someone else's beautiful idea. I ended up with a tool, a process, and a little more confidence that I can make things like this myself.</p>
+
+<p>Mine is a sketch from a video. Theirs is the work.</p>
+
+<h2>What I learned</h2>
+
+<ul>
+  <li>How procedural rendering of water droplets works (shadow, body, refractive glow, specular highlight, dark meniscus rim, five layered ellipses per drop, drawn once into an offscreen buffer).</li>
+  <li>How frame-differencing motion detection works (subtract the previous frame from the current; pixels that differ above a threshold are motion).</li>
+  <li>How <code>getUserMedia</code> and the modern browser camera API work, and why localhost vs. file:// URLs behave differently for privacy permissions.</li>
+  <li>How Tone.js routes voices through reverb and delay buses; how column-position can be mapped to a pentatonic scale; how a slow LFO sweeping a band-pass filter on brown noise sounds remarkably like distant rain.</li>
+</ul>
+
+<p>Each of those is a door. Now that I've walked through them once, I can walk through them again on my own projects. That's the part of this experience that doesn't go away when the tab is closed.</p>
+
+<h2>Try it</h2>
+
+<p>A live version is at <a href="https://annbjer.github.io/un-hommage-a-baton-de-pluies/un-hommage-a-baton-de-pluies.html" target="_blank" rel="noopener">annbjer.github.io/un-hommage-a-baton-de-pluies</a>. The source is on <a href="https://github.com/annbjer/un-hommage-a-baton-de-pluies" target="_blank" rel="noopener">GitHub</a>. It runs entirely in your browser; the camera feed never leaves your machine. Point it at anything that moves and listen.</p>
+
+<p>And go look at the <a href="https://ilpleut.studio" target="_blank" rel="noopener">original <em>Bâton de pluies</em></a>. Mine is a sketch from a video. Theirs is the work.</p>
+
+<hr />
+
+<p style="font-style: italic; color: #888;">Thanks to lolalevient and AIRMOW for making something worth recreating and <a href="https://x.com/FigsFromPlums/status/2048749126439829716" target="_blank" rel="noopener">@FigsFromPlums</a> for surfacing it.</p>
